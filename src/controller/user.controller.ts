@@ -13,16 +13,18 @@ export class UserController {
             console.log('A user connected', socket.id);
 
             socket.on('send message', (msg: { to : string; message: string}) => {
+                console.log(`Sending message from ${socket.id} to ${msg.to}`, msg.message);
                 socket.to(msg.to).emit('receive message', {
                     from: socket.id,
                     message: msg.message,
                 });
             });
 
+            
             socket.on('disconnect', () => {
                 console.log('User disconnected', socket.id);
             })
-            
+
         })
     }
 
