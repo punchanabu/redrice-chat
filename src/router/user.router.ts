@@ -10,7 +10,7 @@ export class UserRouter extends BaseRouter {
 
     constructor(io: Server) {
         super(UserRouter.prefix);
-        this.userController = new UserController(io);
+        this.userController = new UserController(io, 'asdASdcxciewpomqwecz');
         this.initRoutes();
     }
 
