@@ -33,6 +33,7 @@ export class UserController {
         socket.disconnect();
       }
 
+      // Check if user not in database
       if (prisma.user.findUnique({ where: { ID: userID } }) == null) {
         console.error("User not found");
         socket.disconnect();
