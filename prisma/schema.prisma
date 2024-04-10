@@ -1,0 +1,17 @@
+datasource db {
+    provider = "postgresql"
+    url      = env("DB_CONN")
+}
+
+generator client {
+    provider = "prisma-client-js"
+}
+
+model User {
+    ID        Int    @id @default(autoincrement())
+    Name      String
+    Email     String
+    Telephone String
+    Role      String
+    Password  String
+}
