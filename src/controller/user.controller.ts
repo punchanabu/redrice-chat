@@ -35,6 +35,7 @@ export class UserController {
 
       // Check if user not in database
       if (prisma.user.findUnique({ where: { ID: userID } }) == null) {
+        socket.emit("auth_error", { message: "User not found in database" });
         console.error("User not found");
         socket.disconnect();
       }
