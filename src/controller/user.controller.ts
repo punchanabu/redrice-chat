@@ -23,7 +23,7 @@ export class UserController {
   }
 
   private initializeChat(): void {
-    this.io.on("connection", (socket: Socket) => {
+    this.io.on("connection", async (socket: Socket) => {
       console.log("A user connected by socketID:", socket.id);
 
       const token = socket.handshake.headers["authorization"];
@@ -44,10 +44,15 @@ export class UserController {
         userID = decodedToken.id;
 
         // Check if user not in database
-        if (prisma.user.findUnique({ where: { ID: Number(userID) } }) == null) {
+        if (
+          (await prisma.users.findUnique({
+            where: { id: Number(userID) },
+          })) == null
+        ) {
           socket.emit("auth_error", { message: "User not found in database" });
           console.error("User not found");
           socket.disconnect();
+          return;
         }
 
         console.log("User connected with userID:", userID);
