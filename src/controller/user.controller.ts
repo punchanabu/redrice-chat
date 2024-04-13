@@ -56,19 +56,22 @@ export class UserController {
         return // Ensure that userID is not used empty
       }
 
+      socket.join("room-" + userID);
+
       socket.on("send message", (msg: { to: string; message: string }) => {
         console.log(
           `Sending message from UserID ${userID} to ${msg.to}`,
           msg.message
         );
-        socket.to(msg.to).emit("receive message", {
-          from: userID,
-          message: msg.message,
+        this.io.to("room-" + msg.to).emit("receive message",{
+            from: userID,
+            message: msg.message,
         });
       });
 
       socket.on("disconnect", () => {
         console.log("User disconnected", socket.id);
+        socket.leave("room-" + userID);
       });
     });
   }
