@@ -1,0 +1,74 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_CONN")
+}
+
+model Reservation {
+  id            Int         @id @default(autoincrement())
+  date_time     DateTime?   @db.Timestamptz(6)
+  user_id       Int?
+  restaurant_id Int?
+  created_at    DateTime?   @db.Timestamptz(6)
+  updated_at    DateTime?   @db.Timestamptz(6)
+  deleted_at    DateTime?   @db.Timestamptz(6)
+  table_num     Int?
+  exit_time     DateTime?   @db.Timestamptz(6)
+  restaurants   Restaurant? @relation(fields: [restaurant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reservations_restaurant")
+  users         User?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reservations_user")
+
+  @@index([deleted_at], map: "idx_reservations_deleted_at")
+}
+
+model Restaurant {
+  id           Int           @id @default(autoincrement())
+  name         String?
+  address      String?
+  telephone    String?
+  open_time    String?
+  close_time   String?
+  instagram    String?
+  facebook     String?
+  description  String?
+  image_url    String?
+  created_at   DateTime?     @db.Timestamptz(6)
+  updated_at   DateTime?     @db.Timestamptz(6)
+  deleted_at   DateTime?     @db.Timestamptz(6)
+  rating       Decimal?      @default(0) @db.Decimal
+  reservations Reservation[]
+  ChatSession  ChatSession[]
+
+  @@index([deleted_at], map: "idx_restaurants_deleted_at")
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String?
+  email        String?
+  telephone    String?
+  role         String?
+  password     String?
+  created_at   DateTime?     @db.Timestamptz(6)
+  updated_at   DateTime?     @db.Timestamptz(6)
+  deleted_at   DateTime?     @db.Timestamptz(6)
+  reservations Reservation[]
+  ChatSession  ChatSession[]
+
+  @@index([deleted_at], map: "idx_users_deleted_at")
+}
+
+model ChatSession {
+  id           String   @id @default(uuid())
+  userId       Int
+  restaurantId Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user       User       @relation(fields: [userId], references: [id])
+  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
+
+  @@index([userId, restaurantId])
+}
