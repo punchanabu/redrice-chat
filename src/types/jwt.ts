@@ -1,10 +1,10 @@
-import { JwtPayload } from "jsonwebtoken";
+import { JwtPayload } from 'jsonwebtoken'
 
 interface DecodedToken extends JwtPayload {
-    id: string;
-    email: string;
-    role: string;
-    exp: number;
+    id: string
+    email: string
+    role: string
+    exp: number
 }
 
-export { DecodedToken };
+export { DecodedToken }
