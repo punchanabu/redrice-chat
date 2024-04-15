@@ -7,6 +7,43 @@ datasource db {
   url      = env("DB_CONN")
 }
 
+model users {
+  id               BigInt         @id @default(autoincrement())
+  name             String?
+  email            String? @unique
+  telephone        String? @unique
+  role             String?
+  password         String?
+  created_at       DateTime?      @db.Timestamptz(6)
+  updated_at       DateTime?      @db.Timestamptz(6)
+  deleted_at       DateTime?      @db.Timestamptz(6)
+
+  // A List of User Chat Session
+  UserChatSessions chatSessions[] @relation("UserChat")
+
+  // If User is a Restaurant, It will be related to the restaurant
+  restaurantId     BigInt?        @unique
+  restaurant       restaurants?   @relation(fields: [restaurantId], references: [id])
+
+  // List of User Reservation
+  reservations     reservations[]
+  RestaurantChatSessions     chatSessions[] @relation("RestaurantChat")
+
+  @@index([deleted_at], map: "idx_users_deleted_at")
+}
+
+model chatSessions {
+  id           String   @id @default(uuid())
+  userId       BigInt
+  restaurantId BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         users    @relation("UserChat", fields: [userId], references: [id])
+  restaurant   users    @relation("RestaurantChat", fields: [restaurantId], references: [id])
+
+  @@index([userId])
+}
+
 model reservations {
   id            BigInt    @id @default(autoincrement())
   date_time     DateTime? @db.Timestamptz(6)
@@ -24,37 +61,6 @@ model reservations {
   @@index([deleted_at], map: "idx_reservations_deleted_at")
 }
 
-model users {
-  id               BigInt         @id @default(autoincrement())
-  name             String?
-  email            String?
-  telephone        String?
-  role             String?
-  password         String?
-  created_at       DateTime?      @db.Timestamptz(6)
-  updated_at       DateTime?      @db.Timestamptz(6)
-  deleted_at       DateTime?      @db.Timestamptz(6)
-  UserChatSessions chatSessions[] @relation("UserChat")
-  restaurant       restaurants?   @relation(fields: [restaurantId], references: [id])
-  restaurantId     BigInt?        @unique
-  reservations     reservations[]
-  chatSessions     chatSessions[]
-
-  @@index([deleted_at], map: "idx_users_deleted_at")
-}
-
-model chatSessions {
-  id           String   @id @default(uuid())
-  userId       BigInt
-  restaurantId BigInt
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  user         users    @relation("UserChat", fields: [userId], references: [id])
-  restaurant   users    @relation(fields: [restaurantId], references: [id])
-
-  @@index([userId])
-}
-
 model restaurants {
   id           BigInt         @id @default(autoincrement())
   name         String?
@@ -66,7 +72,7 @@ model restaurants {
   facebook     String?
   description  String?
   image_url    String?
-  created_at   DateTime?      @db.Timestamptz(6)
+  created_at   DateTime      @db.Timestamptz(6)
   updated_at   DateTime?      @db.Timestamptz(6)
   deleted_at   DateTime?      @db.Timestamptz(6)
   user         users?
