@@ -19,10 +19,5 @@ export class UserRouter extends BaseRouter {
             // This is a mock up it will be implemented later
             res.send('Fetching chat history')
         })
-
-        // Get My Chat Session
-        this.router.get('/session/me', (req,res) => {
-            
-        })
     }
 }
