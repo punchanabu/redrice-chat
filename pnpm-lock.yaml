@@ -11,6 +11,7 @@ dependencies:
   client@latest:
     specifier: link:prisma/client@latest
     version: link:prisma/client@latest
+
   dotenv:
     specifier: ^16.4.5
     version: 16.4.5
