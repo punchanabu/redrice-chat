@@ -20,7 +20,7 @@ export class UserController {
             authenticateUser(token as string, this.secretKey)
                 .then(user => {
                     console.log("User connected with userID:", user.id);
-
+                    socket.on("create chat", (restaurantId) => createChatSession(user.id, restaurantId));
                     socket.on("join chat", (sessionId) => joinChat(socket, sessionId, user.id, { findChatSession }));
                     socket.on("send message", (msg) => sendMessage(socket, this.io, user.id, msg));
                     socket.on("disconnect", () => handleDisconnect(socket));
