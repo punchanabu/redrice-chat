@@ -1,26 +1,26 @@
 import { Socket, Server } from "socket.io";
-import { ChatSession, ChatSessionManager} from "../types/chat";
+import { ChatSessionManager} from "../types/chat";
 
 
-const joinChat = async (socket: Socket, sessionId: string, userId: number, chatSessionManager: ChatSessionManager): Promise<void> => {
+const joinChat = async (socket: Socket, sessionId: string, userId: bigint, chatSessionManager: ChatSessionManager): Promise<void> => {
     const session = await chatSessionManager.findChatSession(sessionId);
-    if (session && (session.userId == userId || session.restaurantId == userId)) {
+    if (session && (session.userId == Number(userId) || session.restaurantId == Number(userId))) {
         socket.join(sessionId);
         console.log(`User ${userId} joined chat session ${sessionId}`);
     } else {
-        socket.emit("auth_error", "Error: Unauthorized access to chat session");
+        socket.emit("error", "Error: Unauthorized access to chat session");
     }
 };
 
 const sendMessage = (
     socket: Socket,
     io: Server,
-    userId: number,
+    userId: bigint,
     msg: { sessionId: string; message: string }
   ): void => {
     if (socket.rooms.has(msg.sessionId)) {
       io.to(msg.sessionId).emit("receive message", {
-        from: userId,
+        from: Number(userId),
         message: msg.message,
       });
     } else {

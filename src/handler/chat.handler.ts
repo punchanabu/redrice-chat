@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
-const createChatSession = async (userId: number, restaurantId: number) => {
-    return await prisma.chatSession.create({
+const createChatSession = async (userId: bigint, restaurantId: number) => {
+    return await prisma.chatSessions.create({
         data: {
             userId,
             restaurantId,
@@ -12,7 +12,7 @@ const createChatSession = async (userId: number, restaurantId: number) => {
 };
 
 const findChatSession = async (sessionId: string) => {
-    return await prisma.chatSession.findUnique({
+    return await prisma.chatSessions.findUnique({
         where: { id: sessionId }
     });
 };

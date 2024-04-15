@@ -7,24 +7,56 @@ datasource db {
   url      = env("DB_CONN")
 }
 
-model Reservation {
-  id            Int         @id @default(autoincrement())
-  date_time     DateTime?   @db.Timestamptz(6)
-  user_id       Int?
-  restaurant_id Int?
-  created_at    DateTime?   @db.Timestamptz(6)
-  updated_at    DateTime?   @db.Timestamptz(6)
-  deleted_at    DateTime?   @db.Timestamptz(6)
-  table_num     Int?
-  exit_time     DateTime?   @db.Timestamptz(6)
-  restaurants   Restaurant? @relation(fields: [restaurant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reservations_restaurant")
-  users         User?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reservations_user")
+model reservations {
+  id            BigInt    @id @default(autoincrement())
+  date_time     DateTime? @db.Timestamptz(6)
+  table_num     BigInt?
+  exit_time     DateTime? @db.Timestamptz(6)
+  user_id       BigInt?
+  restaurant_id BigInt?
+  created_at    DateTime? @db.Timestamptz(6)
+  updated_at    DateTime? @db.Timestamptz(6)
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  user       users?       @relation(fields: [user_id], references: [id])
+  restaurant restaurants? @relation(fields: [restaurant_id], references: [id])
 
   @@index([deleted_at], map: "idx_reservations_deleted_at")
 }
 
-model Restaurant {
-  id           Int           @id @default(autoincrement())
+model users {
+  id               BigInt         @id @default(autoincrement())
+  name             String?
+  email            String?
+  telephone        String?
+  role             String?
+  password         String?
+  created_at       DateTime?      @db.Timestamptz(6)
+  updated_at       DateTime?      @db.Timestamptz(6)
+  deleted_at       DateTime?      @db.Timestamptz(6)
+  UserChatSessions chatSessions[] @relation("UserChat")
+  restaurant       restaurants?   @relation(fields: [restaurantId], references: [id])
+  restaurantId     BigInt?        @unique
+  reservations     reservations[]
+  chatSessions     chatSessions[]
+
+  @@index([deleted_at], map: "idx_users_deleted_at")
+}
+
+model chatSessions {
+  id           String   @id @default(uuid())
+  userId       BigInt
+  restaurantId BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         users    @relation("UserChat", fields: [userId], references: [id])
+  restaurant   users    @relation(fields: [restaurantId], references: [id])
+
+  @@index([userId])
+}
+
+model restaurants {
+  id           BigInt         @id @default(autoincrement())
   name         String?
   address      String?
   telephone    String?
@@ -34,41 +66,11 @@ model Restaurant {
   facebook     String?
   description  String?
   image_url    String?
-  created_at   DateTime?     @db.Timestamptz(6)
-  updated_at   DateTime?     @db.Timestamptz(6)
-  deleted_at   DateTime?     @db.Timestamptz(6)
-  rating       Decimal?      @default(0) @db.Decimal
-  reservations Reservation[]
-  ChatSession  ChatSession[]
+  created_at   DateTime?      @db.Timestamptz(6)
+  updated_at   DateTime?      @db.Timestamptz(6)
+  deleted_at   DateTime?      @db.Timestamptz(6)
+  user         users?
+  reservations reservations[]
 
   @@index([deleted_at], map: "idx_restaurants_deleted_at")
-}
-
-model User {
-  id           Int           @id @default(autoincrement())
-  name         String?
-  email        String?
-  telephone    String?
-  role         String?
-  password     String?
-  created_at   DateTime?     @db.Timestamptz(6)
-  updated_at   DateTime?     @db.Timestamptz(6)
-  deleted_at   DateTime?     @db.Timestamptz(6)
-  reservations Reservation[]
-  ChatSession  ChatSession[]
-
-  @@index([deleted_at], map: "idx_users_deleted_at")
-}
-
-model ChatSession {
-  id           String   @id @default(uuid())
-  userId       Int
-  restaurantId Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  user       User       @relation(fields: [userId], references: [id])
-  restaurant Restaurant @relation(fields: [restaurantId], references: [id])
-
-  @@index([userId, restaurantId])
 }
