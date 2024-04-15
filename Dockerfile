@@ -1,16 +1,40 @@
-FROM node:21-alpine3.18 AS base
+# Builder stage
+FROM node:20.12.0-alpine3.19 AS builder
 
-RUN npm i -g pnpm 
+WORKDIR /build
+
+# Install dependencies using npm
+COPY package*.json ./
+RUN npm install
+
+# Generate Prisma Client
+RUN npx prisma generate
+# Copy the rest of the application code
+COPY . ./
+
+# Build the project
+RUN npm run build
+
+# Runner stage
+FROM node:20.12.0-alpine3.19 AS runner
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install
+# Copy built files from the builder stage
+COPY --from=builder /build/dist/ ./dist/
 
-COPY . .
+# Copy Prisma schema and generated Prisma client
+COPY --from=builder /build/node_modules/.prisma /app/node_modules/.prisma
+COPY --from=builder /build/prisma ./prisma
 
-RUN pnpm build
+# Copy package files
+COPY package*.json ./
 
+# Install only production dependencies
+RUN npm install 
+
+# Set the port the container will listen on
 EXPOSE 6969
 
-CMD ["pnpm", "preview"]
+# Define the command to run the app
+CMD ["npm", "start"]

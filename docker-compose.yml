@@ -5,6 +5,5 @@ services:
     image: app
     build:
       context: .
-      dockerfile: Dockerfile
     ports:
       - 80:6969
