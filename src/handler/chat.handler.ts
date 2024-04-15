@@ -1,5 +1,5 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { PrismaClient } from '@prisma/client'
+const prisma = new PrismaClient()
 
 const createChatSession = async (userId: bigint, restaurantId: number) => {
     return await prisma.chatSessions.create({
@@ -8,13 +8,13 @@ const createChatSession = async (userId: bigint, restaurantId: number) => {
             restaurantId,
             createdAt: new Date(),
         },
-    });
-};
+    })
+}
 
 const findChatSession = async (sessionId: string) => {
     return await prisma.chatSessions.findUnique({
-        where: { id: sessionId }
-    });
-};
+        where: { id: sessionId },
+    })
+}
 
-export { createChatSession, findChatSession };
+export { createChatSession, findChatSession }
