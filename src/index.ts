@@ -11,8 +11,8 @@ console.log('Starting the Application..... 🔥')
 
 initServer(app, httpServer, io)
     .then(() => {
-        httpServer.listen(3000, () => {
-            console.log('server is running on PORT 3000')
+        httpServer.listen(6969, () => {
+            console.log('server is running on PORT 6969')
         })
     })
 

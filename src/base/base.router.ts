@@ -14,4 +14,8 @@ export abstract class BaseRouter {
     getPrefix() {
         return this.prefix
     }
+
+    getRouter() {
+        return this.router
+    }
 }

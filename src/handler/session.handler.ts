@@ -1,5 +1,6 @@
 import { Socket, Server } from 'socket.io'
 import { ChatSessionManager } from '../types/chat'
+import { RestaurantSockets } from '../types/socket'
 
 const joinChat = async (
     socket: Socket,
@@ -36,9 +37,6 @@ const sendMessage = (
     }
 }
 
-const handleDisconnect = (socket: Socket): void => {
-    socket.emit('disconnected', 'You have been disconnected!')
-    console.log('User disconnected', socket.id)
-}
 
-export { joinChat, sendMessage, handleDisconnect }
+
+export { joinChat, sendMessage }
