@@ -1,12 +1,13 @@
 import { Server as HTTPServer } from 'http';
 import express, { Express } from 'express';
-import cors from 'cors';
 import { Server } from 'socket.io';
 import { UserRouter } from './router/user.router';
 
 
 // This will be a function to initialize the server
 export async function initServer(app: Express, server: HTTPServer, io: Server) {
+    
+    const cors = require('cors');
     app.use(cors());
     
     // endpoint to check the status of the server

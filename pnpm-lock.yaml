@@ -8,6 +8,12 @@ dependencies:
   '@prisma/client':
     specifier: ^5.12.1
     version: 5.12.1(prisma@5.12.1)
+  client@latest:
+    specifier: link:prisma/client@latest
+    version: link:prisma/client@latest
+  cors:
+    specifier: ^2.8.5
+    version: 2.8.5
   dotenv:
     specifier: ^16.4.5
     version: 16.4.5

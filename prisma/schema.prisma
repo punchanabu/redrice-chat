@@ -8,19 +8,51 @@ datasource db {
 }
 
 model reservations {
-  id            BigInt       @id @default(autoincrement())
-  date_time     DateTime?    @db.Timestamptz(6)
+  id            BigInt    @id @default(autoincrement())
+  date_time     DateTime? @db.Timestamptz(6)
+  table_num     BigInt?
+  exit_time     DateTime? @db.Timestamptz(6)
   user_id       BigInt?
   restaurant_id BigInt?
-  created_at    DateTime?    @db.Timestamptz(6)
-  updated_at    DateTime?    @db.Timestamptz(6)
-  deleted_at    DateTime?    @db.Timestamptz(6)
-  table_num     BigInt?
-  exit_time     DateTime?    @db.Timestamptz(6)
-  restaurants   restaurants? @relation(fields: [restaurant_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reservations_restaurant")
-  users         users?       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "fk_reservations_user")
+  created_at    DateTime? @db.Timestamptz(6)
+  updated_at    DateTime? @db.Timestamptz(6)
+  deleted_at    DateTime? @db.Timestamptz(6)
+
+  user       users?       @relation(fields: [user_id], references: [id])
+  restaurant restaurants? @relation(fields: [restaurant_id], references: [id])
 
   @@index([deleted_at], map: "idx_reservations_deleted_at")
+}
+
+model users {
+  id               BigInt         @id @default(autoincrement())
+  name             String?
+  email            String?
+  telephone        String?
+  role             String?
+  password         String?
+  created_at       DateTime?      @db.Timestamptz(6)
+  updated_at       DateTime?      @db.Timestamptz(6)
+  deleted_at       DateTime?      @db.Timestamptz(6)
+  UserChatSessions chatSessions[] @relation("UserChat")
+  restaurant       restaurants?   @relation(fields: [restaurantId], references: [id])
+  restaurantId     BigInt?        @unique
+  reservations     reservations[]
+  chatSessions     chatSessions[]
+
+  @@index([deleted_at], map: "idx_users_deleted_at")
+}
+
+model chatSessions {
+  id           String   @id @default(uuid())
+  userId       BigInt
+  restaurantId BigInt
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         users    @relation("UserChat", fields: [userId], references: [id])
+  restaurant   users    @relation(fields: [restaurantId], references: [id])
+
+  @@index([userId])
 }
 
 model restaurants {
@@ -37,23 +69,8 @@ model restaurants {
   created_at   DateTime?      @db.Timestamptz(6)
   updated_at   DateTime?      @db.Timestamptz(6)
   deleted_at   DateTime?      @db.Timestamptz(6)
-  rating       Decimal?       @default(0) @db.Decimal
+  user         users?
   reservations reservations[]
 
   @@index([deleted_at], map: "idx_restaurants_deleted_at")
-}
-
-model users {
-  id           BigInt         @id @default(autoincrement())
-  name         String?
-  email        String?
-  telephone    String?
-  role         String?
-  password     String?
-  created_at   DateTime?      @db.Timestamptz(6)
-  updated_at   DateTime?      @db.Timestamptz(6)
-  deleted_at   DateTime?      @db.Timestamptz(6)
-  reservations reservations[]
-
-  @@index([deleted_at], map: "idx_users_deleted_at")
 }
