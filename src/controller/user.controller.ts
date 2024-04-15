@@ -3,6 +3,7 @@ import { authenticateUser } from '../handler/auth.handler'
 import {
     joinChat,
     sendMessage,
+    getMySession,
 } from '../handler/session.handler'
 import { createChatSession, findChatSession } from '../handler/chat.handler'
 import { ChatSession } from '../types/chat'
@@ -32,11 +33,11 @@ export class UserController {
                             throw Error("Invalid Restaurant Id There is no restaurantId in the user object!");
                         }
 
-                        this.addAdminSocket(user.restaurant_id?.toString(), socket)
+                        this.addRestaurantSocket(user.restaurant_id?.toString(), socket)
                     } 
 
                     socket.on('create chat', (restaurantId) =>
-                        createChatSession(user.id, restaurantId).then(session => {
+                        createChatSession(user.id, restaurantId, socket).then(session => {
                             this.notifySession(restaurantId,{
                                 message: `A User with ID:${session.userId} want to chat with you!`,
                                 sessionId: session.id,
@@ -44,7 +45,7 @@ export class UserController {
                             })
                         })
                     )
-
+                    socket.on('get my session', () => getMySession(user.id, socket, user.role || "user"))
                     socket.on('join chat', (sessionId) =>
                         joinChat(socket, sessionId, user.id, {
                             findChatSession: findChatSession as (
@@ -67,16 +68,23 @@ export class UserController {
         })
     }
 
-    private addAdminSocket(restaurantId: string, socket: Socket) {
+    private addRestaurantSocket(restaurantId: string, socket: Socket) {
         this.restaurantSockets[restaurantId] = this.restaurantSockets[restaurantId] || [];
         this.restaurantSockets[restaurantId].push(socket);
     }
 
     private notifySession(restaurantId: string, message : NotifySessionMessage) {
         let restaurantSockets = this.restaurantSockets[restaurantId];
+        
         if (restaurantSockets) {
+            
             restaurantSockets.forEach(restaurantSocket => {
-                restaurantSocket.emit('chat request', message.sessionId)
+                restaurantSocket.emit('session', message.sessionId)
+                joinChat(restaurantSocket, message.sessionId, message.userId, {
+                    findChatSession: findChatSession as (
+                        sessionId: string
+                    ) => Promise<ChatSession | null>,
+                })
             });
         } 
     }

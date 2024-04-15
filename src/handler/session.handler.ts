@@ -37,7 +37,8 @@ const sendMessage = (
 ): void => {
     if (socket.rooms.has(msg.sessionId)) {
         io.to(msg.sessionId).emit('receive message', {
-            from: Number(userId),
+            fromUserId: Number(userId),
+            socketId: msg.sessionId,
             message: msg.message,
         })
     } else {
@@ -45,6 +46,48 @@ const sendMessage = (
     }
 }
 
+const getMySession = async (userId: bigint, socket: Socket, role: string) => {
+
+    let session;
+    if (role == "user") {
+        session = await prisma.chatSessions.findMany({
+            where: { userId: userId },
+        })
+    }
+    else if (role == "restaurant") {
+        const restaurantUser = await prisma.users.findUnique({
+            where: { id: Number(userId) },
+        })
+        if (!restaurantUser) {
+            socket.emit('error', 'Error: Restaurant Admin not found')
+            return
+        }
+        session = await prisma.chatSessions.findMany({
+            where: { restaurantId: Number(restaurantUser.restaurant_id) },
+        })
+
+    }
+    if (session) {
+        if (session.length > 0) {
+            if (role == "user") {
+                socket.emit('session', session.map(s => ({
+                    sessionId: s.id,
+                    restaurantId: Number(s.restaurantId),
+                })));
+            }
+            else if (role == "restaurant") {
+                socket.emit('session', session.map(s => ({
+                    sessionId: s.id,
+                    userId: Number(s.userId)
+                })));
+            }
+        } else {
+            socket.emit('error', 'Error: Chat session not found');
+        }
+    } else {
+        socket.emit('error', 'Error: Chat session not found')
+    }
+}
 
 
-export { joinChat, sendMessage }
+export { joinChat, sendMessage, getMySession }
