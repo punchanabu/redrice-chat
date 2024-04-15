@@ -1,6 +1,9 @@
 import { Socket, Server } from 'socket.io'
 import { ChatSessionManager } from '../types/chat'
 import { RestaurantSockets } from '../types/socket'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 const joinChat = async (
     socket: Socket,
@@ -9,11 +12,16 @@ const joinChat = async (
     chatSessionManager: ChatSessionManager
 ): Promise<void> => {
     const session = await chatSessionManager.findChatSession(sessionId)
+    if (!session) {
+        socket.emit('error', 'Error: Chat session not found')
+        return
+    }
+    const restaurantUser = await prisma.users.findUnique({
+        where: { restaurant_id: Number(session.restaurantId) },
+    })
     if (
-        session &&
-        (session.userId == Number(userId) ||
-            session.restaurantId == Number(userId))
-    ) {
+        session && restaurantUser 
+    ) {  
         socket.join(sessionId)
         console.log(`User ${userId} joined chat session ${sessionId}`)
     } else {

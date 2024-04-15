@@ -25,14 +25,14 @@ export class UserController {
             const token = socket.handshake.headers['authorization']
             authenticateUser(token as string, this.secretKey)
                 .then((user) => {
-                    console.log('User connected with userID:', user.id)
+                    console.log('User connected with userID:', Number(user.id))
                     
                     if (user.role == "restaurant") {
-                        if (!user.restaurantId) {
-                            throw Error("Invalid Restaurant Id");
+                        if (!user.restaurant_id) {
+                            throw Error("Invalid Restaurant Id There is no restaurantId in the user object!");
                         }
 
-                        this.addAdminSocket(user.restaurantId?.toString(), socket)
+                        this.addAdminSocket(user.restaurant_id?.toString(), socket)
                     } 
 
                     socket.on('create chat', (restaurantId) =>
