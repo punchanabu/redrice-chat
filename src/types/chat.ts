@@ -4,8 +4,8 @@ interface ChatSessionManager {
 
 interface ChatSession {
     id: string
-    userId: number
-    restaurantId: number
+    userId?: bigint
+    restaurantId?: bigint
     createdAt: Date
 }
 

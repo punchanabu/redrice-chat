@@ -1,5 +1,5 @@
 import { Socket, Server } from 'socket.io'
-import { ChatSessionManager } from '../types/chat'
+import { ChatSession, ChatSessionManager } from '../types/chat'
 import { RestaurantSockets } from '../types/socket'
 import { PrismaClient } from '@prisma/client'
 
@@ -48,7 +48,7 @@ const sendMessage = (
 
 const getMySession = async (userId: bigint, socket: Socket, role: string) => {
 
-    let session;
+    let session: ChatSession[] = [];
     if (role == "user") {
         session = await prisma.chatSessions.findMany({
             where: { userId: userId },
