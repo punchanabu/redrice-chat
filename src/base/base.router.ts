@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router } from 'express'
 
 export abstract class BaseRouter {
     router: Router
@@ -13,5 +13,9 @@ export abstract class BaseRouter {
 
     getPrefix() {
         return this.prefix
+    }
+
+    getRouter() {
+        return this.router
     }
 }

@@ -1,0 +1,9 @@
+version: "1.0"
+services:
+  app:
+    container_name: redrice-chat
+    image: app
+    build:
+      context: .
+    ports:
+      - 80:6969
