@@ -2,6 +2,7 @@ import { Socket, Server } from 'socket.io'
 import { ChatSession, ChatSessionManager } from '../types/chat'
 import { RestaurantSockets } from '../types/socket'
 import { PrismaClient } from '@prisma/client'
+import { timeStamp } from 'console'
 
 const prisma = new PrismaClient()
 
@@ -33,19 +34,19 @@ const sendMessage = (
     socket: Socket,
     io: Server,
     userId: bigint,
-    msg: { sessionId: string; message: string }
+    msg: { sessionId: string; message: string, timeStamp : string }
 ): void => {
     if (socket.rooms.has(msg.sessionId)) {
         io.to(msg.sessionId).emit('receive message', {
             fromUserId: Number(userId),
             socketId: msg.sessionId,
             message: msg.message,
+            timeStamp : new Date().getTime()
         })
     } else {
         socket.emit('error', 'Error: You are not a member of this chat session')
     }
 }
-
 const getMySession = async (userId: bigint, socket: Socket, role: string) => {
 
     let session: ChatSession[] = [];
