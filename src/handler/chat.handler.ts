@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { Socket } from 'socket.io'
-import { ChatSession, MessageSession } from '../types/chat'
+import { MessageSession } from '../types/chat'
 
 const prisma = new PrismaClient()
 
@@ -83,23 +83,36 @@ const findChatSession = async (sessionId: string) => {
 
 const getAllChatMessages = async (sessionId: string) => {
     // Find the chat session using the provided sessionId
-    const chatSession = await findChatSession(sessionId);
+    const chatSession = await findChatSession(sessionId)
 
     if (!chatSession) {
-        throw new Error('Chat session not found');
+        throw new Error('Chat session not found')
     }
 
-    const msgsIDs: string[] = chatSession.msgs;
-    let msgsArray: MessageSession[] = [];
+    const msgsIDs: string[] = chatSession.msgs
+    const msgsArray: (MessageSession | null)[] = []
 
-    msgsIDs.forEach((id: string) => {
-        const msg: MessageSession = prisma.msgSessions.findUnique({
-            where: { id: id }
+    for (const id of msgsIDs) {
+        const result = await prisma.msgSessions.findUnique({
+            where: { id: id },
         })
-        msgsArray.push(msg);
-    });
+        const msg: MessageSession | null = result
+            ? {
+                  ...result,
+                  msg: result.msg || '', // Default to an empty string if msg is null
+              }
+            : null
+        msgsArray.push(msg)
+    }
 
-    return msgsArray;
+    // msgsIDs.forEach((id: string) => {
+    //     const msg: MessageSession = prisma.msgSessions.findUnique({
+    //         where: { id: id }
+    //     })
+    //     msgsArray.push(msg);
+    // });
+
+    return msgsArray
 }
 
 export { createChatSession, findChatSession, getAllChatMessages }

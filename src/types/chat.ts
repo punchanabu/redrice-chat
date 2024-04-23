@@ -12,9 +12,9 @@ interface ChatSession {
 
 interface MessageSession {
     id: string
-    msg: string
-    senderId: number
-    receiverId: number
+    msg: string | null
+    senderId: bigint | null
+    receiverId: bigint | null
     createdAt: Date
     updatedAt: Date
 }
