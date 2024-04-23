@@ -4,6 +4,7 @@ interface ChatSessionManager {
 
 interface ChatSession {
     id: string
+    msgs: string[]
     userId: number
     restaurantId: number
     createdAt: Date
