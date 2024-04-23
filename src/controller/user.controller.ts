@@ -23,9 +23,8 @@ export class UserController {
     private initializeChat(): void {
         this.io.on('connection', (socket: Socket) => {
             console.log('A user connected by socketID:', socket.id)
-            const token = socket.handshake.headers.authorization?.split(' ')[1]
-            console.log(token);
-            authenticateUser(token as unknown as string, this.secretKey)
+            const token = socket.handshake.auth.token;
+            authenticateUser(token as string, this.secretKey)
                 .then((user) => {
                     console.log('User connected with userID:', Number(user.id))
                     
