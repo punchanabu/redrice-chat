@@ -45,7 +45,26 @@ const createChatSession = async (
             },
         })
     } else {
-        socket.emit('error', 'Error: Fail to create chat room')
+        socket.emit('error', 'Error: Fail to create user chat room')
+        return
+    }
+
+    // Add chat room to restaurant.chatRooms
+    const restaurant = await prisma.restaurants.findUnique({
+        where: { id: restaurantId },
+    })
+
+    if (restaurant) {
+        const updatedChatRooms = [...restaurant.chatRooms, session.id]
+
+        await prisma.restaurants.update({
+            where: { id: restaurantId },
+            data: {
+                chatRooms: updatedChatRooms,
+            },
+        })
+    } else {
+        socket.emit('error', 'Error: Fail to create restaurant chat room')
         return
     }
 
