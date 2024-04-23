@@ -85,7 +85,7 @@ model restaurants {
 }
 
 model msgSessions {
-  id         BigInt   @id @default(autoincrement())
+  id         String   @id @default(uuid())
   msg        String?
   senderId   BigInt?
   receiverId BigInt?

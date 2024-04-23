@@ -53,7 +53,7 @@ const sendMessage = async (
             where: { id: msg.sessionId },
         })
         if (chatSession) {
-            const updatedMsgs = [...chatSession.msgs, message.id.toString()]
+            const updatedMsgs = [...chatSession.msgs, message.id]
 
             await prisma.chatSessions.update({
                 where: { id: msg.sessionId },
