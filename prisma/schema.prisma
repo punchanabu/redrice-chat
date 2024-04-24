@@ -23,12 +23,13 @@ model users {
   UserChatSessions chatSessions[] @relation("UserChat")
 
   // If User is a Restaurant, It will be related to the restaurant
-  restaurant_id BigInt?      @unique
-  restaurant    restaurants? @relation(fields: [restaurant_id], references: [id])
+  restaurant_id BigInt? @unique
+  // restaurant    restaurants? @relation(fields: [restaurant_id], references: [id])
 
   // List of User Reservation
   reservations           reservations[]
   RestaurantChatSessions chatSessions[] @relation("RestaurantChat")
+  restaurants            restaurants[]
 
   @@index([deleted_at], map: "idx_users_deleted_at")
 }
@@ -78,8 +79,9 @@ model restaurants {
   created_at   DateTime       @db.Timestamptz(6)
   updated_at   DateTime?      @db.Timestamptz(6)
   deleted_at   DateTime?      @db.Timestamptz(6)
-  user         users?
+  user         users?         @relation(fields: [usersId], references: [id])
   reservations reservations[]
+  usersId      BigInt?
 
   @@index([deleted_at], map: "idx_restaurants_deleted_at")
 }

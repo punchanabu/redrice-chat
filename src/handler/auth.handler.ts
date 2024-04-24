@@ -3,10 +3,7 @@ import { PrismaClient } from '@prisma/client'
 import { DecodedToken } from '../types/jwt'
 const prisma = new PrismaClient()
 
-const authenticateUser = async (
-    token: string,
-    secretKey: string,
-) => {
+const authenticateUser = async (token: string, secretKey: string) => {
     if (!token) {
         throw new Error('Token not provided')
     }
