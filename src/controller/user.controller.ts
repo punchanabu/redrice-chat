@@ -1,7 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import { authenticateUser } from '../handler/auth.handler'
 import { joinChat, sendMessage, getMySession } from '../handler/session.handler'
-import { createChatSession, findChatSession } from '../handler/chat.handler'
+import { createChatSession, findChatSession, getChatHistory } from '../handler/chat.handler'
 import { ChatSession } from '../types/chat'
 import type { RestaurantSockets, NotifySessionMessage } from '../types/socket'
 
@@ -67,6 +67,10 @@ export class UserController {
 
                     socket.on('send message', (msg) =>
                         sendMessage(socket, this.io, user.id, msg)
+                    )
+                    
+                    socket.on('chat history', (sessionId) =>
+                        getChatHistory(sessionId, socket)
                     )
 
                     socket.on('disconnect', () => this.handleDisconnect(socket))
