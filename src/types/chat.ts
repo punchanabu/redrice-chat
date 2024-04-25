@@ -9,7 +9,7 @@ interface ChatSession {
     createdAt: Date
 }
 
-interface MessageSession {
+interface Message {
     id: string
     msg: string | null
     senderId: bigint | null
@@ -18,4 +18,4 @@ interface MessageSession {
     updatedAt: Date
 }
 
-export { ChatSessionManager, ChatSession, MessageSession }
+export { ChatSessionManager, ChatSession, Message }

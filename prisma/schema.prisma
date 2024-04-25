@@ -24,7 +24,6 @@ model users {
 
   // If User is a Restaurant, It will be related to the restaurant
   restaurant_id BigInt? @unique
-  // restaurant    restaurants? @relation(fields: [restaurant_id], references: [id])
 
   // List of User Reservation
   reservations           reservations[]
@@ -36,7 +35,7 @@ model users {
 
 model chatSessions {
   id           String   @id @default(uuid())
-  msgs         String[] @default([]) // List of Message ids
+  msgs         String[] @default([]) 
   userId       BigInt
   restaurantId BigInt
   createdAt    DateTime @default(now())

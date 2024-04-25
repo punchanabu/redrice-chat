@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client'
 import { Socket } from 'socket.io'
-import { MessageSession } from '../types/chat'
+import { Message } from '../types/chat'
 
 const prisma = new PrismaClient()
 
@@ -9,74 +9,74 @@ const createChatSession = async (
     restaurantId: number,
     socket: Socket
 ) => {
-    const res_user = await prisma.users.findUnique({
+    const restaurantUser = await prisma.users.findUnique({
         where: { restaurant_id: restaurantId },
     })
 
-    if (res_user) {
-        const existingSession = await prisma.chatSessions.findFirst({
-            where: {
-                userId,
-                restaurantId: res_user.id,
-            },
-        })
+    if (!restaurantUser) return 
 
-        if (existingSession) {
-            socket.emit('session', existingSession.id)
-            socket.join(existingSession.id)
-            console.log(
-                `User ${userId} created chat session ${existingSession.id}`
-            )
-            return existingSession
-        }
+    const existingSession = await prisma.chatSessions.findFirst({
+        where: {
+            userId,
+            restaurantId: restaurantUser.id,
+        },
+    })
+    if (existingSession) {
+        socket.emit('session', existingSession.id)
+        socket.join(existingSession.id)
+        console.log(
+            `User ${userId} created chat session ${existingSession.id}`
+        )
+        return existingSession
+    }
 
-        const session = await prisma.chatSessions.create({
-            data: {
-                userId: userId,
-                restaurantId: res_user.id,
-                createdAt: new Date(),
-            },
-        })
+    // Create the Session
+    const session = await prisma.chatSessions.create({
+        data: {
+            userId: userId,
+            restaurantId: restaurantUser.id,
+            createdAt: new Date(),
+        },
+    })
 
-        // Add chat room to user.chatRooms
-        const user = await prisma.users.findUnique({
+    // Add chat room to user's chat rooms 
+    const user = await prisma.users.findUnique({
+        where: { id: userId },
+    })
+
+    if (user) {
+        const updatedChatRooms = [...user.chatRooms, session.id]
+        await prisma.users.update({
             where: { id: userId },
+            data: {
+                chatRooms: updatedChatRooms,
+            },
         })
+    } else {
+        socket.emit('error', 'Error: Fail to create user chat room')
+        return
+    }
 
-        if (user) {
-            const updatedChatRooms = [...user.chatRooms, session.id]
+    // Add chat room to restaurant user's chat rooms
+    if (restaurantUser.id) {
+        const updatedChatRooms = [...restaurantUser.chatRooms, session.id]
+        await prisma.users.update({
+            where: { id: restaurantUser.id },
+            data: {
+                chatRooms: updatedChatRooms,
+            },
+        })
+    } else {
+        socket.emit('error', 'Error: Fail to create restaurant chat room')
+        return
+    }
 
-            await prisma.users.update({
-                where: { id: userId },
-                data: {
-                    chatRooms: updatedChatRooms,
-                },
-            })
-        } else {
-            socket.emit('error', 'Error: Fail to create user chat room')
-            return
-        }
-
-        // Add chat room to restaurant_user.chatRooms
-        if (res_user.id) {
-            const updatedChatRooms = [...res_user.chatRooms, session.id]
-
-            await prisma.users.update({
-                where: { id: res_user.id },
-                data: {
-                    chatRooms: updatedChatRooms,
-                },
-            })
-        } else {
-            socket.emit('error', 'Error: Fail to create restaurant chat room')
-            return
-        }
-
-        socket.emit('session', session.id)
-        socket.join(session.id)
-        console.log(`User ${userId} created chat session ${session.id}`)
-        return session
-        }
+    socket.emit('session', session.id)
+    
+    // Auto joining for user who created chat room
+    socket.join(session.id)
+    console.log(`User ${userId} created chat session ${session.id}`)
+    return session
 }
 
 const findChatSession = async (sessionId: string) => {
@@ -86,40 +86,43 @@ const findChatSession = async (sessionId: string) => {
 }
 
 const getChatHistory = async (sessionId: string, socket: Socket) => {
-    // Find the chat session using the provided sessionId
+
     const chatSession = await findChatSession(sessionId)
 
     if (!chatSession) {
+        socket.emit("error", "Cannot get history chat history not found in DB")
         throw new Error('Chat session not found')
     }
 
-    const msgsIDs: string[] = chatSession.msgs
-    const msgsArray: (MessageSession | null)[] = []
+    const messageIDList: string[] = chatSession.msgs
+    const messageList: Message[] = []
 
-    for (const id of msgsIDs) {
+    for (const id of messageIDList) {
         const result = await prisma.msgSessions.findUnique({
             where: { id: id },
         })
-        const msg: MessageSession | null = result
-            ? {
-                  ...result,
-                  msg: result.msg || '', // Default to an empty string if msg is null
-              }
-            : null
-        msgsArray.push(msg)
+
+        if (result) {
+            const message: Message = {
+                ...result,
+                msg: result.msg || '',
+            }
+            messageList.push(message)
+        } else {
+            return
+        }
     }
     
-    if(msgsArray.length > 0) {
+    if(messageList.length > 0) {
         // Convert BigInt values to strings before emitting
-        const serializedMessages = msgsArray.map(msg => ({
-            ...msg,
-            senderId: msg?.senderId?.toString(),
-            receiverId: msg?.receiverId?.toString(),
-            createdAt: msg?.createdAt?.toISOString(),
-            updatedAt: msg?.updatedAt?.toISOString()
+        const serializedMessages = messageList.map(message => ({
+            ...message,
+            senderId: message?.senderId?.toString(),
+            receiverId: message?.receiverId?.toString(),
+            createdAt: message?.createdAt?.toISOString(),
+            updatedAt: message?.updatedAt?.toISOString()
         }))
 
-        console.log(serializedMessages)
         socket.emit('chat history', serializedMessages)
     }
 }

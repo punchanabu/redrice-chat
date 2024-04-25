@@ -16,7 +16,6 @@ const joinChat = async (
         socket.emit('error', 'Error: Chat session not found')
         return
     }
-    console.log(session)
     const restaurantUser = await prisma.users.findUnique({
         where: { id: Number(session.restaurantId) },
     })
