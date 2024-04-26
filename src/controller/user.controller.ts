@@ -4,23 +4,25 @@ import { joinChat, sendMessage, getMySession } from '../handler/session.handler'
 import { createChatSession, findChatSession, getChatHistory } from '../handler/chat.handler'
 import { ChatSession } from '../types/chat'
 import type { RestaurantSockets, NotifySessionMessage } from '../types/socket'
+import { PrismaClient } from '@prisma/client'
 
 export class UserController {
     private io: Server
     private secretKey: string
     private restaurantSockets: RestaurantSockets = {}
-
+    private prisma: PrismaClient;
     constructor(io: Server, secretKey: string) {
         this.io = io
         this.secretKey = secretKey
         this.initializeChat()
+        this.prisma = new PrismaClient;
     }
 
     private initializeChat(): void {
         this.io.on('connection', (socket: Socket) => {
             console.log('A user connected by socketID:', socket.id)
             const token = socket.handshake.headers['authorization']
-            authenticateUser(token as string, this.secretKey)
+            authenticateUser(token as string, this.secretKey, this.prisma)
                 .then((user) => {
                     console.log('User connected with userID:', Number(user.id))
 
