@@ -79,15 +79,15 @@ const findChatSession = async (sessionId: string, prisma: PrismaClient) => {
 
 const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaClient) => {
 
-    const chatSession = await findChatSession(sessionId, prisma)
+    const chatSession = await findChatSession(sessionId, prisma);
 
     if (!chatSession) {
-        socket.emit("error", "Cannot get history chat history not found in DB")
-        throw new Error('Chat session not found')
+        socket.emit("error", "Cannot get history chat history not found in DB");
+        throw new Error('Chat session not found');
     }
 
-    const messageIDList: string[] = chatSession.msgs
-    const messageList: Message[] = []
+    const messageIDList: string[] = chatSession.msgs || [];
+    const messageList: Message[] = [];
 
     for (const id of messageIDList) {
         const result = await prisma.msgSessions.findUnique({
@@ -101,7 +101,7 @@ const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaC
             }
             messageList.push(message)
         } else {
-            return
+            continue;
         }
     }
     

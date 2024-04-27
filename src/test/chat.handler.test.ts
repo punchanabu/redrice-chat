@@ -91,43 +91,20 @@ describe('it should properly handle chat operation', () => {
   describe('getChatHistory', () => {
     it('should retrieve chat history for a session', async () => {
       // Setup
-      const sessionId = "8d6dc97d-9ab3-4b05-affb-c3dfd938202f";
-      const mockSession: ChatSession = {
-        id: sessionId,
-        userId: 1,
-        restaurantId: 1,
-        createdAt: new Date(),
-      };
-      const mockMessages: Message[] = [
-        {
-          id: "msg1",
-          msg: "Hello",
-          senderId: BigInt(1),
-          receiverId: BigInt(2),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "msg2",
-          msg: "Hi there",
-          senderId: BigInt(2),
-          receiverId: BigInt(1),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+      const sessionId = 'some-session-id';
+      const mockMessages = [{ id: 'msg1', msg: 'Hello', senderId: BigInt(1), receiverId: BigInt(2), createdAt: new Date(), updatedAt: new Date() }];
+      const mockChatSession = { id: sessionId, msgs: mockMessages.map(m => m.id) };
 
-      (prisma.chatSessions.findUnique as jest.Mock).mockResolvedValueOnce(mockSession);
-      (prisma.msgSessions.findUnique as jest.Mock)
-        .mockResolvedValueOnce(mockMessages[0])
-        .mockResolvedValueOnce(mockMessages[1]);
+      (prisma.chatSessions.findUnique as jest.Mock).mockResolvedValue(mockChatSession);
+      (prisma.msgSessions.findUnique as jest.Mock).mockImplementation((opts) => 
+          Promise.resolve(mockMessages.find(m => m.id === opts.where.id)));
 
       // Execute
       await getChatHistory(sessionId, mockSocket as Socket, prisma);
 
       // Assert
       expect(mockSocket.emit).toHaveBeenCalledWith('chat history', expect.any(Array));
-    });
+  });
 
     it('should throw an error if chat session is not found', async () => {
       // Setup
