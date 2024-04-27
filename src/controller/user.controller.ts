@@ -40,7 +40,7 @@ export class UserController {
                     }
 
                     socket.on('create chat', (restaurantId) =>
-                        createChatSession(user.id, restaurantId, socket).then(
+                        createChatSession(user.id, restaurantId, socket, this.prisma).then(
                             (session) => {
                                 if (session) {
                                     this.notifySession(restaurantId, {
@@ -72,7 +72,7 @@ export class UserController {
                     )
                     
                     socket.on('chat history', (sessionId) =>
-                        getChatHistory(sessionId, socket)
+                        getChatHistory(sessionId, socket, this.prisma)
                     )
 
                     socket.on('disconnect', () => this.handleDisconnect(socket))

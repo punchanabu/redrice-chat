@@ -2,12 +2,13 @@ import { PrismaClient } from '@prisma/client'
 import { Socket } from 'socket.io'
 import { Message } from '../types/chat'
 
-const prisma = new PrismaClient()
+
 
 const createChatSession = async (
     userId: bigint,
     restaurantId: number,
-    socket: Socket
+    socket: Socket,
+    prisma: PrismaClient
 ) => {
     const restaurantUser = await prisma.users.findUnique({
         where: { restaurant_id: restaurantId },
@@ -79,15 +80,15 @@ const createChatSession = async (
     return session
 }
 
-const findChatSession = async (sessionId: string) => {
+const findChatSession = async (sessionId: string, prisma: PrismaClient) => {
     return await prisma.chatSessions.findUnique({
         where: { id: sessionId },
     })
 }
 
-const getChatHistory = async (sessionId: string, socket: Socket) => {
+const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaClient) => {
 
-    const chatSession = await findChatSession(sessionId)
+    const chatSession = await findChatSession(sessionId, prisma)
 
     if (!chatSession) {
         socket.emit("error", "Cannot get history chat history not found in DB")
