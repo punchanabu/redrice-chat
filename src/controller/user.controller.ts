@@ -57,18 +57,18 @@ export class UserController {
                     )
 
                     socket.on('get my session', () =>
-                        getMySession(user.id, socket, user.role || 'user')
+                        getMySession(user.id, socket, user.role || 'user', this.prisma)
                     )
                     socket.on('join chat', (sessionId) =>
                         joinChat(socket, sessionId, user.id, {
                             findChatSession: findChatSession as (
                                 sessionId: string
                             ) => Promise<ChatSession | null>,
-                        })
+                        }, this.prisma)
                     )
 
                     socket.on('send message', (msg) =>
-                        sendMessage(socket, this.io, user.id, msg)
+                        sendMessage(socket, this.io, user.id, msg, this.prisma)
                     )
                     
                     socket.on('chat history', (sessionId) =>
@@ -101,7 +101,7 @@ export class UserController {
                     findChatSession: findChatSession as (
                         sessionId: string
                     ) => Promise<ChatSession | null>,
-                })
+                }, this.prisma)
             })
         }
     }

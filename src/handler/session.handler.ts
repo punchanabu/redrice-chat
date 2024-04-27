@@ -3,15 +3,16 @@ import { ChatSessionManager } from '../types/chat'
 // import { RestaurantSockets } from '../types/socket'
 import { PrismaClient } from '@prisma/client'
 
-const prisma = new PrismaClient()
 
 const joinChat = async (
     socket: Socket,
     sessionId: string,
     userId: bigint,
-    chatSessionManager: ChatSessionManager
+    chatSessionManager: ChatSessionManager,
+    prisma: PrismaClient,
 ): Promise<void> => {
     const session = await chatSessionManager.findChatSession(sessionId)
+
     if (!session) {
         socket.emit('error', 'Error: Chat session not found')
         return
@@ -20,15 +21,13 @@ const joinChat = async (
         where: { id: Number(session.restaurantId) },
     })
 
-    if (restaurantUser) {
+    if (!restaurantUser) {
         socket.emit('error', 'Error: restaurant user in this restaurant not found');
+        return;
     }
-    
-    if (session && restaurantUser) {
+    if (session) {
         socket.join(sessionId)
         console.log(`User ${userId} joined chat session ${sessionId}`)
-    } else {
-        socket.emit('error', 'Error: Unauthorized access to chat session')
     }
 }
 
@@ -36,7 +35,8 @@ const sendMessage = async (
     socket: Socket,
     io: Server,
     userId: bigint,
-    msg: { sessionId: string; message: string }
+    msg: { sessionId: string; message: string },
+    prisma: PrismaClient,
 ): Promise<void> => {
     if (socket.rooms.has(msg.sessionId)) {
         io.to(msg.sessionId).emit('receive message', {
@@ -72,7 +72,7 @@ const sendMessage = async (
     }
 }
 
-const getMySession = async (userId: bigint, socket: Socket, role: string) => {
+const getMySession = async (userId: bigint, socket: Socket, role: string, prisma: PrismaClient) => {
     let session
     if (role == 'user') {
         session = await prisma.chatSessions.findMany({
@@ -89,6 +89,9 @@ const getMySession = async (userId: bigint, socket: Socket, role: string) => {
         session = await prisma.chatSessions.findMany({
             where: { restaurantId: Number(restaurantUser.id) },
         })
+    } else {
+        socket.emit('error', 'Error: Invalid role')
+        return
     }
     if (session) {
         if (session.length > 0) {
@@ -112,9 +115,7 @@ const getMySession = async (userId: bigint, socket: Socket, role: string) => {
         } else {
             socket.emit('error', 'Error: Chat session not found')
         }
-    } else {
-        socket.emit('error', 'Error: Chat session not found')
-    }
+    } 
 }
 
 export { joinChat, sendMessage, getMySession }

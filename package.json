@@ -45,6 +45,7 @@
     },
     "jest": {
         "preset": "ts-jest",
-        "testEnvironment": "node"
+        "testEnvironment": "node",
+        "coverageDirectory": "node_modules/coverage"
     }
 }

@@ -18,7 +18,7 @@ const authenticateUser = async (token: string, secretKey: string, prisma: Prisma
         }
         return user
     } catch (error) {
-        console.error("Error during authentication:", error);
+        console.log("Error during authentication:", error);
         throw error;
     }
 }

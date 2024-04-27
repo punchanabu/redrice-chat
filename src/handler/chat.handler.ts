@@ -14,7 +14,10 @@ const createChatSession = async (
         where: { restaurant_id: restaurantId },
     })
 
-    if (!restaurantUser) return 
+    if (!restaurantUser) {
+        socket.emit('error', 'Error: Restaurant user not found')
+        return
+    }
 
     const existingSession = await prisma.chatSessions.findFirst({
         where: {
@@ -86,7 +89,11 @@ const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaC
         throw new Error('Chat session not found');
     }
 
-    const messageIDList: string[] = chatSession.msgs || [];
+    const messageIDList: string[] = chatSession.msgs;
+    if (!messageIDList) {
+        socket.emit("chat history", []);
+        return;
+    }
     const messageList: Message[] = [];
 
     for (const id of messageIDList) {
@@ -97,7 +104,7 @@ const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaC
         if (result) {
             const message: Message = {
                 ...result,
-                msg: result.msg || '',
+                msg: result.msg || "",
             }
             messageList.push(message)
         } else {
@@ -116,6 +123,8 @@ const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaC
         }))
 
         socket.emit('chat history', serializedMessages)
+    } else {
+        socket.emit('chat history', [])
     }
 }
 
