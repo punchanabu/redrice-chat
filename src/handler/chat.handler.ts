@@ -40,41 +40,32 @@ const createChatSession = async (
         },
     })
 
+    // Update chat rooms for both users and restaurant
+    const updateChatRooms = async (userToUpdate: { id: bigint | number; chatRooms?: string[] }) => {
+        const updatedChatRooms = [...(userToUpdate.chatRooms || []), session.id];
+        await prisma.users.update({
+            where: { id: userToUpdate.id },
+            data: {
+                chatRooms: updatedChatRooms,
+            },
+        });
+    };
+
     // Add chat room to user's chat rooms 
     const user = await prisma.users.findUnique({
         where: { id: userId },
     })
 
     if (user) {
-        const updatedChatRooms = [...user.chatRooms, session.id]
-        await prisma.users.update({
-            where: { id: userId },
-            data: {
-                chatRooms: updatedChatRooms,
-            },
-        })
+        await updateChatRooms(user);
     } else {
-        socket.emit('error', 'Error: Fail to create user chat room')
-        return
+        socket.emit('error', 'Error: User not found');
+        return;
     }
 
-    // Add chat room to restaurant user's chat rooms
-    if (restaurantUser.id) {
-        const updatedChatRooms = [...restaurantUser.chatRooms, session.id]
-        await prisma.users.update({
-            where: { id: restaurantUser.id },
-            data: {
-                chatRooms: updatedChatRooms,
-            },
-        })
-    } else {
-        socket.emit('error', 'Error: Fail to create restaurant chat room')
-        return
-    }
+    await updateChatRooms(restaurantUser);
 
     socket.emit('session', session.id)
-    
-    // Auto joining for user who created chat room
     socket.join(session.id)
     console.log(`User ${userId} created chat session ${session.id}`)
     return session
