@@ -9,4 +9,13 @@ interface ChatSession {
     createdAt: Date
 }
 
-export { ChatSessionManager, ChatSession }
+interface Message {
+    id: string
+    msg: string | null
+    senderId: bigint | null
+    receiverId: bigint | null
+    createdAt: Date
+    updatedAt: Date
+}
+
+export { ChatSessionManager, ChatSession, Message }
