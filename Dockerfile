@@ -1,22 +1,26 @@
 # Builder stage
 FROM node:20.12.0-alpine3.19 AS builder
+
 WORKDIR /build
 
 # Install dependencies using npm
 COPY package*.json ./
 RUN npm install
 
+# Generate Prisma Client
+RUN npx prisma generate
+
 # Copy the rest of the application code
 COPY . ./
 
 # Generate Prisma Client
 RUN npx prisma generate
-
 # Build the project
 RUN npm run build
 
 # Runner stage
 FROM node:20.12.0-alpine3.19 AS runner
+
 WORKDIR /app
 
 # Copy built files from the builder stage
@@ -30,7 +34,7 @@ COPY --from=builder /build/prisma ./prisma
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm install --only=production
+RUN npm install 
 
 # Run Prisma migrations
 RUN npx prisma migrate deploy
