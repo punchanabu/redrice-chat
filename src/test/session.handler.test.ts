@@ -59,7 +59,7 @@ describe('Session Handler', () => {
       (mockPrisma.users.findUnique as jest.Mock).mockResolvedValueOnce(restaurantUser);
 
       // Act
-      await joinChat(mockSocket as Socket, sessionId, userId, mockChatSessionManager as ChatSessionManager, mockPrisma as PrismaClient);
+      await joinChat(mockSocket as Socket, sessionId, userId, mockPrisma as PrismaClient);
 
       // Assert
       expect(mockSocket.join).toHaveBeenCalledWith(sessionId);
@@ -74,7 +74,7 @@ describe('Session Handler', () => {
       (mockChatSessionManager.findChatSession as jest.Mock).mockResolvedValueOnce(null);
 
       // Act
-      await joinChat(mockSocket as Socket, sessionId, userId, mockChatSessionManager as ChatSessionManager, mockPrisma as PrismaClient);
+      await joinChat(mockSocket as Socket, sessionId, userId, mockPrisma as PrismaClient);
 
       // Assert
       expect(mockSocket.emit).toHaveBeenCalledWith('error', 'Error: Chat session not found');
@@ -90,7 +90,7 @@ describe('Session Handler', () => {
       (mockPrisma.users.findUnique as jest.Mock).mockResolvedValue(null);
 
       // Act
-      await joinChat(mockSocket as Socket, sessionId, userId, mockChatSessionManager as ChatSessionManager, mockPrisma as PrismaClient);
+      await joinChat(mockSocket as Socket, sessionId, userId, mockPrisma as PrismaClient);
 
       // Assert
       expect(mockSocket.emit).toHaveBeenCalledWith("error", "Error: restaurant user in this restaurant not found");
@@ -104,7 +104,7 @@ describe('Session Handler', () => {
       (mockChatSessionManager.findChatSession as jest.Mock).mockResolvedValueOnce(null);
   
       // Act
-      await joinChat(mockSocket as Socket, sessionId, userId, mockChatSessionManager as ChatSessionManager, mockPrisma as PrismaClient);
+      await joinChat(mockSocket as Socket, sessionId, userId, mockPrisma as PrismaClient);
   
       // Assert
       expect(mockSocket.emit).toHaveBeenCalledWith('error', 'Error: Chat session not found');
@@ -262,7 +262,7 @@ describe('Session Handler', () => {
       // Arrange
       const userId = BigInt(1);
       const role = 'user';
-      const sessions: any[] = [];
+      const sessions: unknown[] = [];
       (mockPrisma.chatSessions.findMany as jest.Mock).mockResolvedValueOnce(sessions);
 
       // Act
@@ -291,7 +291,7 @@ describe('Session Handler', () => {
       // Arrange
       const userId = BigInt(1);
       const role = 'user';
-      const sessions: any[] = [];
+      const sessions: unknown[] = [];
       (mockPrisma.chatSessions.findMany as jest.Mock).mockResolvedValueOnce(sessions);
   
       // Act

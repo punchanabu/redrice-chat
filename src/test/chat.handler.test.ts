@@ -2,7 +2,6 @@ import { Socket } from 'socket.io';
 import { createChatSession, findChatSession, getChatHistory } from "../handler/chat.handler";
 import { PrismaClient } from '@prisma/client';
 import { ChatSession } from '../types/chat';
-import type { Message } from '../types/chat';
 
 jest.mock('@prisma/client', () => ({
   PrismaClient: jest.fn().mockImplementation(() => ({

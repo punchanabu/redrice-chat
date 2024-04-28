@@ -1,8 +1,7 @@
 import { Server, Socket } from 'socket.io'
 import { authenticateUser } from '../handler/auth.handler'
 import { joinChat, sendMessage, getMySession } from '../handler/session.handler'
-import { createChatSession, findChatSession, getChatHistory } from '../handler/chat.handler'
-import { ChatSession } from '../types/chat'
+import { createChatSession, getChatHistory } from '../handler/chat.handler'
 import type { RestaurantSockets, NotifySessionMessage } from '../types/socket'
 import { PrismaClient } from '@prisma/client'
 
@@ -55,22 +54,15 @@ export class UserController {
                             }
                         )
                     )
-
-                    socket.on('get my session', () =>
-                        getMySession(user.id, socket, user.role || 'user', this.prisma)
-                    )
+                    socket.on('get my session', () => getMySession(user.id, socket, user.role || "user", this.prisma))
                     socket.on('join chat', (sessionId) =>
-                        joinChat(socket, sessionId, user.id, {
-                            findChatSession: findChatSession as (
-                                sessionId: string
-                            ) => Promise<ChatSession | null>,
-                        }, this.prisma)
+                        joinChat(socket, sessionId, user.id, this.prisma)
                     )
 
                     socket.on('send message', (msg) =>
                         sendMessage(socket, this.io, user.id, msg, this.prisma)
                     )
-                    
+
                     socket.on('chat history', (sessionId) =>
                         getChatHistory(sessionId, socket, this.prisma)
                     )
@@ -97,11 +89,7 @@ export class UserController {
         if (restaurantSockets) {
             restaurantSockets.forEach((restaurantSocket) => {
                 restaurantSocket.emit('session', message.sessionId)
-                joinChat(restaurantSocket, message.sessionId, message.userId, {
-                    findChatSession: findChatSession as (
-                        sessionId: string
-                    ) => Promise<ChatSession | null>,
-                }, this.prisma)
+                joinChat(restaurantSocket, message.sessionId, message.userId,this.prisma)
             })
         }
     }

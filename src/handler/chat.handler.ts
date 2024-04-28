@@ -75,13 +75,14 @@ const createChatSession = async (
 }
 
 const findChatSession = async (sessionId: string, prisma: PrismaClient) => {
-    return await prisma.chatSessions.findUnique({
+    const result = await prisma.chatSessions.findUnique({
         where: { id: sessionId },
     })
+    return result;
 }
 
 const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaClient) => {
-
+    console.log("hello")
     const chatSession = await findChatSession(sessionId, prisma);
 
     if (!chatSession) {

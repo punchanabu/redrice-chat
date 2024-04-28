@@ -1,17 +1,14 @@
 import { Socket, Server } from 'socket.io'
-import { ChatSessionManager } from '../types/chat'
-// import { RestaurantSockets } from '../types/socket'
 import { PrismaClient } from '@prisma/client'
-
+import { findChatSession } from './chat.handler'
 
 const joinChat = async (
     socket: Socket,
     sessionId: string,
     userId: bigint,
-    chatSessionManager: ChatSessionManager,
     prisma: PrismaClient,
 ): Promise<void> => {
-    const session = await chatSessionManager.findChatSession(sessionId)
+    const session = await findChatSession(sessionId, prisma)
 
     if (!session) {
         socket.emit('error', 'Error: Chat session not found')
