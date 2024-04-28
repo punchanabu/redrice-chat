@@ -1,6 +1,10 @@
 import { Socket, Server } from 'socket.io'
 import { PrismaClient } from '@prisma/client'
 import { findChatSession } from './chat.handler'
+import { ChatSession, ChatSessionManager } from '../types/chat'
+import { RestaurantSockets } from '../types/socket'
+import { PrismaClient } from '@prisma/client'
+import { timeStamp } from 'console'
 
 const joinChat = async (
     socket: Socket,
@@ -32,14 +36,15 @@ const sendMessage = async (
     socket: Socket,
     io: Server,
     userId: bigint,
-    msg: { sessionId: string; message: string },
+    msg: { sessionId: string; message: string, timeStamp : string },
     prisma: PrismaClient,
-): Promise<void> => {
+): Promise<void> => { 
     if (socket.rooms.has(msg.sessionId)) {
         io.to(msg.sessionId).emit('receive message', {
             fromUserId: Number(userId),
             socketId: msg.sessionId,
             message: msg.message,
+            timeStamp : new Date().getTime()
         })
 
         // Save message to msgSession table in database
@@ -70,8 +75,9 @@ const sendMessage = async (
 }
 
 const getMySession = async (userId: bigint, socket: Socket, role: string, prisma: PrismaClient) => {
-    let session
-    if (role == 'user') {
+
+    let session: ChatSession[] = [];
+    if (role == "user") {
         session = await prisma.chatSessions.findMany({
             where: { userId: userId },
         })
