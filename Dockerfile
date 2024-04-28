@@ -36,9 +36,6 @@ COPY package*.json ./
 # Install only production dependencies
 RUN npm install 
 
-# Run Prisma migrations
-RUN npx prisma migrate deploy
-
 # Set the port the container will listen on
 EXPOSE 6969
 
