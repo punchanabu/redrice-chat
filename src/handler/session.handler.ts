@@ -3,7 +3,6 @@ import { PrismaClient } from '@prisma/client'
 import { findChatSession } from './chat.handler'
 import { ChatSession, ChatSessionManager } from '../types/chat'
 import { RestaurantSockets } from '../types/socket'
-import { PrismaClient } from '@prisma/client'
 import { timeStamp } from 'console'
 
 const joinChat = async (
