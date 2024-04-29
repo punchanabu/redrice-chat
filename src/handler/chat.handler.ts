@@ -75,6 +75,9 @@ const createChatSession = async (
 }
 
 const findChatSession = async (sessionId: string, prisma: PrismaClient) => {
+    if (!sessionId) {
+        return null;
+    }
     const result = await prisma.chatSessions.findUnique({
         where: { id: sessionId },
     })
