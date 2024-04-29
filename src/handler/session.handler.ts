@@ -76,7 +76,7 @@ const sendMessage = async (
                 chatSession?.restaurantId?.toString() ||
                 chatSession?.userId?.toString()
 
-            io.to(receiverId).emit('notification',receiverId, {
+            io.emit('notification', {
                 fromUserId: Number(userId),
                 message: msg.message,
                 timeStamp: new Date().getTime(),
