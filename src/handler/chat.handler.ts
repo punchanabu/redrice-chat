@@ -87,7 +87,7 @@ const getChatHistory = async (sessionId: string, socket: Socket, prisma: PrismaC
 
     if (!chatSession) {
         socket.emit("error", "Cannot get history chat history not found in DB");
-        throw new Error('Chat session not found');
+        return;
     }
 
     const messageIDList: string[] = chatSession.msgs;

@@ -76,9 +76,6 @@ CREATE TABLE "msgSessions" (
 );
 
 -- CreateIndex
--- CREATE UNIQUE INDEX "users_restaurant_id_key" ON "users"("restaurant_id");
-
--- CreateIndex
 CREATE INDEX "idx_users_deleted_at" ON "users"("deleted_at");
 
 -- CreateIndex
