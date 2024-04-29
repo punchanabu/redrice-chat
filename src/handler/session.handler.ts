@@ -74,7 +74,6 @@ const sendMessage = async (
 
             io.emit('notification', {
                 fromUserId: Number(userId),
-                toUserId: chatSession.userId,
                 message: msg.message,
                 timeStamp: new Date().getTime(),
             })
