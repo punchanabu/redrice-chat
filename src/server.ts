@@ -6,12 +6,13 @@ import { UserRouter } from './router/user.router'
 
 // This will be a function to initialize the server
 export async function initServer(app: Express, server: HTTPServer, io: Server) {
-    
-    app.use(cors({
-        origin: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE'],
-        allowedHeaders: ['Content-Type', 'Authorization'],
-    }));
+    app.use(
+        cors({
+            origin: true,
+            methods: ['GET', 'POST', 'PUT', 'DELETE'],
+            allowedHeaders: ['Content-Type', 'Authorization'],
+        })
+    )
 
     // endpoint to check the status of the server
     app.get('/healthz', (req, res) => {

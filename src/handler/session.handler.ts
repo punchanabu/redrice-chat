@@ -9,7 +9,7 @@ const joinChat = async (
     socket: Socket,
     sessionId: string,
     userId: bigint,
-    prisma: PrismaClient,
+    prisma: PrismaClient
 ): Promise<void> => {
     const session = await findChatSession(sessionId, prisma)
 
@@ -22,8 +22,11 @@ const joinChat = async (
     })
 
     if (!restaurantUser) {
-        socket.emit('error', 'Error: restaurant user in this restaurant not found');
-        return;
+        socket.emit(
+            'error',
+            'Error: restaurant user in this restaurant not found'
+        )
+        return
     }
     if (session) {
         socket.join(sessionId)
@@ -35,15 +38,15 @@ const sendMessage = async (
     socket: Socket,
     io: Server,
     userId: bigint,
-    msg: { sessionId: string; message: string, timeStamp : string },
-    prisma: PrismaClient,
-): Promise<void> => { 
+    msg: { sessionId: string; message: string; timeStamp: string },
+    prisma: PrismaClient
+): Promise<void> => {
     if (socket.rooms.has(msg.sessionId)) {
         io.to(msg.sessionId).emit('receive message', {
             fromUserId: Number(userId),
             socketId: msg.sessionId,
             message: msg.message,
-            timeStamp : new Date().getTime()
+            timeStamp: new Date().getTime(),
         })
 
         // Save message to msgSession table in database
@@ -67,16 +70,30 @@ const sendMessage = async (
                     msgs: updatedMsgs,
                 },
             })
+
+            // Send notification to the receiver
+            const receiverId =
+                chatSession?.restaurantId?.toString() ||
+                chatSession?.userId?.toString()
+            io.to(receiverId).emit('notification', {
+                fromUserId: Number(userId),
+                message: msg.message,
+                timeStamp: new Date().getTime(),
+            })
         }
     } else {
         socket.emit('error', 'Error: You are not a member of this chat session')
     }
 }
 
-const getMySession = async (userId: bigint, socket: Socket, role: string, prisma: PrismaClient) => {
-
-    let session: ChatSession[] = [];
-    if (role == "user") {
+const getMySession = async (
+    userId: bigint,
+    socket: Socket,
+    role: string,
+    prisma: PrismaClient
+) => {
+    let session: ChatSession[] = []
+    if (role == 'user') {
         session = await prisma.chatSessions.findMany({
             where: { userId: userId },
         })
@@ -117,7 +134,7 @@ const getMySession = async (userId: bigint, socket: Socket, role: string, prisma
         } else {
             socket.emit('error', 'Error: Chat session not found')
         }
-    } 
+    }
 }
 
 export { joinChat, sendMessage, getMySession }

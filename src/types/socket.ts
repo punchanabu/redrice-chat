@@ -1,12 +1,12 @@
-import { Socket } from "socket.io";
+import { Socket } from 'socket.io'
 
 interface RestaurantSockets {
-    [restaurantId: string] : Socket[]
+    [restaurantId: string]: Socket[]
 }
 
 interface NotifySessionMessage {
-    message: string,
-    sessionId: string,
-    userId: bigint,
+    message: string
+    sessionId: string
+    userId: bigint
 }
-export { RestaurantSockets, NotifySessionMessage };
+export { RestaurantSockets, NotifySessionMessage }

@@ -9,18 +9,18 @@ export class UserController {
     private io: Server
     private secretKey: string
     private restaurantSockets: RestaurantSockets = {}
-    private prisma: PrismaClient;
+    private prisma: PrismaClient
     constructor(io: Server, secretKey: string) {
         this.io = io
         this.secretKey = secretKey
         this.initializeChat()
-        this.prisma = new PrismaClient;
+        this.prisma = new PrismaClient()
     }
 
     private initializeChat(): void {
         this.io.on('connection', (socket: Socket) => {
             console.log('A user connected by socketID:', socket.id)
-            const token = socket.handshake.auth.token;
+            const token = socket.handshake.auth.token
             authenticateUser(token as string, this.secretKey, this.prisma)
                 .then((user) => {
                     console.log('User connected with userID:', Number(user.id))
@@ -39,22 +39,32 @@ export class UserController {
                     }
 
                     socket.on('create chat', (restaurantId) =>
-                        createChatSession(user.id, restaurantId, socket, this.prisma).then(
-                            (session) => {
-                                if (session) {
-                                    this.notifySession(restaurantId, {
-                                        message: `A User with ID:${session.userId} want to chat with you!`,
-                                        sessionId: session.id,
-                                        userId: session.userId,
-                                    })
-                                } else {
-                                    // Handle the case where session is undefined
-                                    console.error('Session is undefined')
-                                }
+                        createChatSession(
+                            user.id,
+                            restaurantId,
+                            socket,
+                            this.prisma
+                        ).then((session) => {
+                            if (session) {
+                                this.notifySession(restaurantId, {
+                                    message: `A User with ID:${session.userId} want to chat with you!`,
+                                    sessionId: session.id,
+                                    userId: session.userId,
+                                })
+                            } else {
+                                // Handle the case where session is undefined
+                                console.error('Session is undefined')
                             }
+                        })
+                    )
+                    socket.on('get my session', () =>
+                        getMySession(
+                            user.id,
+                            socket,
+                            user.role || 'user',
+                            this.prisma
                         )
                     )
-                    socket.on('get my session', () => getMySession(user.id, socket, user.role || "user", this.prisma))
                     socket.on('join chat', (sessionId) =>
                         joinChat(socket, sessionId, user.id, this.prisma)
                     )
@@ -89,7 +99,12 @@ export class UserController {
         if (restaurantSockets) {
             restaurantSockets.forEach((restaurantSocket) => {
                 restaurantSocket.emit('session', message.sessionId)
-                joinChat(restaurantSocket, message.sessionId, message.userId,this.prisma)
+                joinChat(
+                    restaurantSocket,
+                    message.sessionId,
+                    message.userId,
+                    this.prisma
+                )
             })
         }
     }
