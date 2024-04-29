@@ -41,6 +41,11 @@ const sendMessage = async (
     msg: { sessionId: string; message: string; timeStamp: string },
     prisma: PrismaClient
 ): Promise<void> => {
+    io.emit('notification', {
+        fromUserId: Number(userId),
+        message: msg.message,
+        timeStamp: new Date().getTime(),
+    })
     if (socket.rooms.has(msg.sessionId)) {
         io.to(msg.sessionId).emit('receive message', {
             fromUserId: Number(userId),
@@ -72,11 +77,7 @@ const sendMessage = async (
             })
 
 
-            io.emit('notification', {
-                fromUserId: Number(userId),
-                message: msg.message,
-                timeStamp: new Date().getTime(),
-            })
+        
             console.log("sending notifcation");
         }
     } else {
