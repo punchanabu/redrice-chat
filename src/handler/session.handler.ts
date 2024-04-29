@@ -76,12 +76,12 @@ const sendMessage = async (
                 chatSession?.restaurantId?.toString() ||
                 chatSession?.userId?.toString()
 
-            io.emit('notification', {
+            io.to(receiverId).emit('notification',receiverId, {
                 fromUserId: Number(userId),
                 message: msg.message,
                 timeStamp: new Date().getTime(),
             })
-            console.log("sending notifcation to everyone!");
+            console.log("sending notifcation to userId", receiverId);
         }
     } else {
         socket.emit('error', 'Error: You are not a member of this chat session')
