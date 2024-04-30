@@ -123,7 +123,6 @@ const getChatHistory = async (
         const serializedMessages = messageList.map((message) => ({
             ...message,
             senderId: message?.senderId?.toString(),
-            receiverId: message?.receiverId?.toString(),
             createdAt: message?.createdAt?.toISOString(),
             updatedAt: message?.updatedAt?.toISOString(),
         }))
